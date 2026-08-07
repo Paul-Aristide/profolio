@@ -120,15 +120,15 @@ npm run dev
 
 4. **Configurer les variables d'environnement** (onglet "Environment") :
    ```env
-   DATABASE_URL=postgresql://neondb_owner:password@host:port/db?sslmode=require&sslaccept=accept_invalid_certs
-   JWT_SECRET=votre_clé_jwt
-   RESEND_API_KEY=votre_clé_resend
-   RESEND_FROM_EMAIL=onboarding@resend.dev
-   CLOUDINARY_URL=cloudinary://key:secret@cloud_name
-   CLOUDINARY_CLOUD_NAME=votre_cloud_name
-   CLOUDINARY_API_KEY=votre_api_key
-   CLOUDINARY_API_SECRET=votre_api_secret
-   CRON_SECRET=votre_cron_secret
+   DATABASE_URL=""
+   JWT_SECRET=""
+   RESEND_API_KEY=""
+   RESEND_FROM_EMAIL=""
+   CLOUDINARY_URL=""
+   CLOUDINARY_CLOUD_NAME=""
+   CLOUDINARY_API_KEY=""
+   CLOUDINARY_API_SECRET=""
+   CRON_SECRET=""
    ```
 
 5. **Déployer** → Votre app sera disponible sur `https://profolio.onrender.com`
