@@ -1,0 +1,52 @@
+{
+  "name": "profolio",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --hostname 0.0.0.0 --port 3000",
+    "build": "next build",
+    "start": "next start --hostname 0.0.0.0 --port $PORT",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1",
+    "@react-pdf/renderer": "^4.5.1",
+    "@types/uuid": "^10.0.0",
+    "argon2": "^0.45.1",
+    "bcrypt": "^6.0.0",
+    "cloudinary": "^2.10.0",
+    "jose": "^6.2.4",
+    "jsonwebtoken": "^9.0.3",
+    "next": "16.2.12",
+    "pg": "^8.22.0",
+    "prisma": "^7.9.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "uuid": "^14.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/bcrypt": "^6.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20",
+    "@types/pg": "^8.20.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "dotenv": "^17.4.2",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.12",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.1",
+    "typescript": "^5"
+  },
+  "allowScripts": {
+    "argon2@0.45.1": true,
+    "bcrypt@6.0.0": true,
+    "prisma@7.9.1": true,
+    "@prisma/engines@7.9.1": true,
+    "sharp@0.34.5": true,
+    "unrs-resolver@1.12.2": true,
+    "esbuild@0.28.1": true
+  }
+}

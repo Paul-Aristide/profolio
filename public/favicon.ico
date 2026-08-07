@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00E5FF"/>
+      <stop offset="50%" stop-color="#3B8BEB"/>
+      <stop offset="100%" stop-color="#B388FF"/>
+    </linearGradient>
+    <linearGradient id="logoGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00E5FF"/>
+      <stop offset="100%" stop-color="#0077FF"/>
+    </linearGradient>
+  </defs>
+  <!-- Anneau circulaire -->
+  <circle cx="50" cy="50" r="42" stroke="url(#logoGrad)" stroke-width="2.5" fill="none" opacity="0.8"/>
+  <!-- Monogramme PF+ -->
+  <text x="50" y="58" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="bold" font-size="22" fill="url(#logoGrad2)">PF+</text>
+  <!-- Petit + dans le cercle -->
+  <circle cx="50" cy="50" r="4" fill="#00E5FF" opacity="0.3"/>
+</svg>

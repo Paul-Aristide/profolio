@@ -1,0 +1,258 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+model User {
+  id               String          @id @default(uuid())
+  email            String          @unique
+  username         String          @unique
+  password         String          // Haché avec argon2
+  firstName        String
+  lastName         String
+  birthDate        DateTime
+  birthPlace       String
+  phone            String
+  role             UserRole        @default(USER)
+  isProtected      Boolean         @default(false) // Empêche la suppression (super-admin)
+  isBlocked        Boolean         @default(false)
+  blockedAt        DateTime?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  profile          Profile?
+  formations       Formation[]
+  experiences      Experience[]
+   posts            Post[]
+  comments         Comment[]
+  agendaEvents     AgendaEvent[]
+  messagesSent     Message[]       @relation("SentMessages")
+  messagesReceived Message[]       @relation("ReceivedMessages")
+  reports          Report[]
+  reportsReceived  Report[]     @relation("ReportedUser")
+  trustedDevices   TrustedDevice[]
+  otpCodes         OtpCode[]
+  refreshTokens    RefreshToken[]
+  adminTokens      AdminToken[]    @relation("TokenCreatedByAdmin")
+  skills           Skill[]
+  pageViews        PageView[]
+  followers        Follower[]      @relation("FollowerRelation")
+  following        Follower[]      @relation("FollowingRelation")
+}
+
+model AdminToken {
+  id            String    @id @default(uuid())
+  token         String    @unique
+  expiresAt     DateTime
+  usedAt        DateTime?
+  usedByEmail   String?
+  createdByUser String?
+  createdBy     User?     @relation("TokenCreatedByAdmin", fields: [createdByUser], references: [id], onDelete: SetNull)
+  createdAt     DateTime  @default(now())
+}
+
+model Profile {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio           String?
+  expertise     String?
+  maritalStatus String?
+  hobbies       String[]
+  coverPhoto    String?
+  profilePhoto  String?
+  city          String?
+  country       String?
+  neighborhood  String?
+  interests     Json?    // { sports: string[], foods: string[], preferences: string[] }
+  // Réseaux sociaux
+  githubUrl      String?
+  facebookUrl   String?
+  youtubeUrl    String?
+  linkedinUrl   String?
+  whatsappUrl   String?
+  instagramUrl  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Formation {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  institution String
+  year        Int
+  description String?
+  photo       String?
+  createdAt   DateTime @default(now())
+}
+
+model Experience {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String   // Ex: "Data Scientist"
+  company     String   // Ex: "Google"
+  logo        String?   // Logo de l'entreprise
+  startDate   DateTime
+  endDate     DateTime?
+  current     Boolean  @default(false)
+  description String?
+  createdAt   DateTime @default(now())
+}
+
+model Post {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String?
+  description String?
+  content     String?
+  mediaUrl    String?
+  mediaType   String?  // "image" ou "video"
+  linkUrl     String?  // Lien partagé (ex: formation, stage, emploi)
+  backgroundColor String? // Couleur de fond pour les posts sans média
+  createdAt   DateTime @default(now())
+  comments    Comment[]
+  reactions    Reaction[]
+}
+
+model Follower {
+  id           String   @id @default(uuid())
+  userId       String   // Le profil suivi
+  user         User     @relation("FollowerRelation", fields: [userId], references: [id], onDelete: Cascade)
+  followerId   String   // Celui qui suit
+  follower     User     @relation("FollowingRelation", fields: [followerId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  @@unique([userId, followerId])
+  @@index([userId, createdAt])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  senderName String?
+  senderEmail String?
+  content   String
+  isAnonymous Boolean @default(true)
+  createdAt DateTime @default(now())
+}
+
+model AgendaEvent {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  timezone    String   // Ex: "Africa/Abidjan"
+  status      String   // "available", "busy", "uncertain", "holiday"
+  createdAt   DateTime @default(now())
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  senderId   String?
+  sender     User?    @relation("SentMessages", fields: [senderId], references: [id], onDelete: SetNull)
+  senderName String?
+  senderEmail String?
+  receiverId String
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  content    String
+  createdAt  DateTime @default(now())
+}
+
+model Report {
+  id              String    @id @default(uuid())
+  userId          String   // l'utilisateur connecté qui signale SON PROPRE compte
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reportedUserId  String?  // l'utilisateur visé par le signalement
+  reportedUser    User?    @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: SetNull)
+  reason          String   // "identity_theft", "hacking", "other"
+  content         String   // description de ce qu'il a remarqué d'inhabituel
+  status          String   @default("pending") // "pending", "resolved", "dismissed"
+  createdAt       DateTime @default(now())
+}
+
+model TrustedDevice {
+  id        String   @unique @default(uuid())  // <-- @unique au lieu de @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceId  String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  @@id([userId, deviceId])  // <-- Clé primaire composite
+}
+
+model OtpCode {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash  String    // Code OTP haché (jamais en clair)
+  deviceId  String
+  expiresAt DateTime  // Courte durée (10 min)
+  attempts  Int       @default(0)
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique // Le refresh token est haché, jamais stocké en clair
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+}
+
+model Skill {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category    String   // "acquis", "poste_vise", "domaine_formation", "experience"
+  title       String
+  description String?
+  createdAt   DateTime @default(now())
+}
+
+model PageView {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  visitorIp String?
+  userAgent String?
+  referrer  String?
+  viewedAt  DateTime @default(now())
+
+  @@index([userId, viewedAt])
+}
+
+model Reaction {
+  id        String   @id @default(uuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String?  // Null si visiteur anonyme
+  sessionId String?  // ID de session pour visiteur anonyme
+  type      String   // "like", "preference", "favorite"
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId, type])
+  @@unique([postId, sessionId, type])
+}

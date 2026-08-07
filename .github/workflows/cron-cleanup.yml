@@ -1,0 +1,27 @@
+name: Daily Cleanup Cron
+
+on:
+  schedule:
+    # Every day at 00:00 UTC (midnight)
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    # Allow manual triggering for testing
+    inputs:
+      confirm:
+        description: 'Confirmer la suppression des comptes bloqués depuis > 7 jours'
+        required: true
+        default: 'DELETE'
+        type: string
+
+jobs:
+  cleanup-blocked-users:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run cleanup cron
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          APP_URL: ${{ secrets.APP_URL || 'https://profolio.onrender.com' }}
+        run: |
+          curl -X POST "${APP_URL}/api/admin/cron/cleanup-blocked" \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "Content-Type: application/json"
